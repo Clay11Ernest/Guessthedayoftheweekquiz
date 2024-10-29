@@ -14,7 +14,7 @@
             padding: 0;
         }
 
-        .quiz-container {
+        .container {
             max-width: 600px;
             margin: 50px auto;
             background-color: #fff;
@@ -27,8 +27,12 @@
             color: #4CAF50;
         }
 
-        .quiz-header {
-            margin-bottom: 20px;
+        .intro, .quiz-container {
+            display: none;
+        }
+
+        .quiz-container {
+            margin-top: 20px;
         }
 
         .date-display {
@@ -49,7 +53,7 @@
             border-radius: 5px;
         }
 
-        .submit-btn {
+        .btn {
             padding: 10px 20px;
             font-size: 1em;
             border: none;
@@ -60,7 +64,7 @@
             transition: background-color 0.3s ease;
         }
 
-        .submit-btn:hover {
+        .btn:hover {
             background-color: #45a049;
         }
 
@@ -87,20 +91,32 @@
 </head>
 <body>
 
-    <div class="quiz-container">
+    <div class="container">
         <h1>Guess the Day of the Week</h1>
-        <div class="quiz-header">
-            <p>Guess the day of the week for this date:</p>
-            <div class="date-display" id="dateDisplay"></div>
+
+        <div class="intro">
+            <p>Select the range of years for your quiz:</p>
+            <div class="input-container">
+                <input type="number" id="startYear" placeholder="Start Year (e.g., 1700)">
+                <input type="number" id="endYear" placeholder="End Year (e.g., 2100)">
+            </div>
+            <button class="btn" onclick="startQuiz()">Start Quiz</button>
         </div>
 
-        <div class="input-container">
-            <input type="text" id="userGuess" placeholder="Type your guess here (e.g., Monday)">
+        <div class="quiz-container">
+            <div class="quiz-header">
+                <p>Guess the day of the week for this date:</p>
+                <div class="date-display" id="dateDisplay"></div>
+            </div>
+
+            <div class="input-container">
+                <input type="text" id="userGuess" placeholder="Type your guess here (e.g., Monday)">
+            </div>
+
+            <button class="btn" onclick="checkAnswer()">Submit Guess</button>
+
+            <div class="result" id="result"></div>
         </div>
-
-        <button class="submit-btn" onclick="checkAnswer()">Submit Guess</button>
-
-        <div class="result" id="result"></div>
     </div>
 
     <footer>
@@ -109,16 +125,17 @@
 
     <script>
         let currentDate;
+        let startYear;
+        let endYear;
 
-        // Function to generate a random date and display it (without showing the day of the week)
+        // Function to generate a random date within the user-defined range
         function generateRandomDate() {
-            const year = Math.floor(Math.random() * (2100 - 1700 + 1)) + 1700; // Random year from 1700 to 2100
-            const month = Math.floor(Math.random() * 12); // Random month (0-11)
-            const day = Math.floor(Math.random() * 28) + 1; // Random day (1-28 to avoid invalid dates)
+            const year = Math.floor(Math.random() * (endYear - startYear + 1)) + startYear;
+            const month = Math.floor(Math.random() * 12);
+            const day = Math.floor(Math.random() * 28) + 1;
 
             currentDate = new Date(year, month, day);
-            
-            // Custom formatting to hide the day of the week (e.g., showing only "May 11 2090")
+
             const formattedDate = `${currentDate.toLocaleString('en-us', { month: 'short' })} ${day} ${year}`;
             document.getElementById("dateDisplay").textContent = formattedDate;
         }
@@ -127,7 +144,6 @@
         function checkAnswer() {
             const userGuess = document.getElementById("userGuess").value.trim();
             const correctDay = currentDate.toLocaleString('en-us', { weekday: 'long' });
-
             const resultDiv = document.getElementById("result");
 
             if (userGuess.toLowerCase() === correctDay.toLowerCase()) {
@@ -140,17 +156,32 @@
 
             resultDiv.style.display = "block";
 
-            // Clear the input for the next round and generate a new date after a short delay
             document.getElementById("userGuess").value = "";
             setTimeout(() => {
-                resultDiv.style.display = "none"; // Hide the result after a few seconds
-                generateRandomDate(); // Generate a new random date
-            }, 2000); // 2-second delay before moving to the next round
+                resultDiv.style.display = "none";
+                generateRandomDate();
+            }, 2000);
         }
 
-        // Initialize the quiz with a random date
-        document.addEventListener("DOMContentLoaded", () => {
+        // Function to start the quiz with the specified year range
+        function startQuiz() {
+            startYear = parseInt(document.getElementById("startYear").value);
+            endYear = parseInt(document.getElementById("endYear").value);
+
+            if (isNaN(startYear) || isNaN(endYear) || startYear > endYear) {
+                alert("Please enter a valid year range.");
+                return;
+            }
+
+            document.querySelector(".intro").style.display = "none";
+            document.querySelector(".quiz-container").style.display = "block";
+
             generateRandomDate();
+        }
+
+        // Show the intro on page load
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelector(".intro").style.display = "block";
         });
     </script>
 
